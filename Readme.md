@@ -73,7 +73,7 @@ pip install impacket
 ## Instalação
 
 ```bash
-git clone https://github.com/yourusername/ntlmhunter.git
+git clone https://github.com/Caio-Campolino/ntlmhunter.git
 cd ntlmhunter
 chmod +x ntlmhunter.py
 ```
@@ -261,6 +261,6 @@ Contribuições são bem-vindas! Abra uma [issue](../../issues) ou um [pull requ
 
 ---
 
-Desenvolvido para a comunidade de segurança da informação 🔒
+Desenvolvido para a comunidade de segurança da informação.
 
 </div>
