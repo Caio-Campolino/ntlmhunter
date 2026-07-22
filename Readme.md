@@ -22,6 +22,7 @@
 - [Instalação](#-instalação)
 - [Exemplos de Uso](#-exemplos-de-uso)
 - [Estrutura de Arquivos](#-estrutura-de-arquivos)
+- [Suporte a Notação CIDR](#-suporte-a-notação-cidr)
 - [Mecanismo de Validação](#️-mecanismo-de-validação)
 - [Formatos de Saída](#-formatos-de-saída)
 - [Configuração Avançada](#️-configuração-avançada)
@@ -34,12 +35,14 @@
 
 ## 🔍 Visão Geral
 
-**NTLMHunter** é uma solução para auditorias de segurança em ambientes Windows, unindo em um único fluxo de trabalho:
+**NTLMHunter** é uma solução completa para testes de segurança em ambientes Windows, unindo em um único fluxo de trabalho:
 
--  **Cracking offline** de hashes NTLM utilizando **Hashcat**
--  **Validação online** via autenticação SMB com **Pass-the-Hash**
--  **Verificação dupla** de credenciais para eliminar falsos positivos
--  **Processamento paralelo** para testes em larga escala
+- **Cracking offline** de hashes NTLM utilizando **Hashcat**
+- **Validação online** via autenticação SMB com **Pass-the-Hash**
+- **Verificação dupla** de credenciais para eliminar falsos positivos
+- **Processamento paralelo** para testes em larga escala
+
+> Projetado para pentesters e equipes de segurança realizarem auditorias de credenciais de forma rápida, confiável e com relatórios prontos para entrega.
 
 ---
 
@@ -47,13 +50,14 @@
 
 | Recurso | Descrição |
 |---|---|
-|  Múltiplos formatos de hash | Suporte a dumps `SAM` e listas `user:hash` |
-|  Extração automática de domínio | Identifica o domínio a partir dos hashes fornecidos |
-|  Dupla verificação | Validação via `listShares` + fallback `IPC$` |
-|  Threading otimizado | Testes simultâneos configuráveis |
-|  Múltiplos relatórios | Exportação em `TXT`, `JSON` e `CSV` |
-|  Versionamento automático | Evita sobrescrever arquivos de saída existentes |
-|  Permissões seguras | Arquivos de resultado salvos com permissão `600` |
+| Múltiplos formatos de hash | Suporte a dumps `SAM` e listas `user:hash` |
+| Notação CIDR | Expansão automática de redes (ex: `192.168.1.0/24`) em alvos individuais |
+| Extração automática de domínio | Identifica o domínio a partir dos hashes fornecidos |
+| Dupla verificação | Validação via `listShares` + fallback `IPC$` |
+| Threading otimizado | Testes simultâneos configuráveis |
+| Múltiplos relatórios | Exportação em `TXT`, `JSON` e `CSV` |
+| Versionamento automático | Evita sobrescrever arquivos de saída existentes |
+| Permissões seguras | Arquivos de resultado salvos com permissão `600` |
 
 ---
 
@@ -136,13 +140,76 @@ usuario2:7c4a8d09ca3762af61e59520943dc264
 
 ### Arquivo de Alvos
 
-Lista de IPs, um por linha:
+Lista de IPs, redes em notação CIDR, ou uma combinação de ambos — um por linha. Linhas em branco e linhas iniciadas com `#` são tratadas como comentários e ignoradas:
 
 ```text
-192.168.1.10
-192.168.1.11
-192.168.1.12
+# Rede completa
+192.168.1.0/24
+
+# IPs específicos
+192.168.2.10
+192.168.2.20
 ```
+
+---
+
+## Suporte a Notação CIDR
+
+O arquivo de alvos aceita redes inteiras em notação **CIDR** (ex: `192.168.1.0/24`), que são automaticamente expandidas para todos os IPs correspondentes antes dos testes.
+
+### Função `load_targets()`
+
+Responsável por carregar e preparar a lista final de alvos:
+
+-  Expande redes CIDR em IPs individuais
+-  Remove duplicatas automaticamente (uso de `set()`)
+-  Ordena os IPs para uma execução consistente e previsível
+-  Fornece feedback detalhado da expansão quando executado com `--verbose`
+-  Valida cada linha do arquivo e trata erros individualmente, sem interromper o carregamento das demais
+
+### Exemplo de arquivo `targets.txt`
+
+```text
+# Rede completa
+192.168.1.0/24
+
+# Sub-rede menor
+10.0.0.0/28
+
+# IPs específicos
+192.168.2.10
+192.168.2.20
+
+# Linha comentada (ignorada)
+# 192.168.3.0/24
+```
+
+### Execução
+
+```bash
+./ntlmhunter.py hashes.txt --targets targets.txt --verbose --threads 30
+```
+
+### Saída esperada
+
+```text
+[*] 15 hashes válidos carregados.
+[*] Expandido 192.168.1.0/24 -> 254 IPs
+[*] Expandido 10.0.0.0/28 -> 14 IPs
+[*] Adicionado IP: 192.168.2.10
+[*] Adicionado IP: 192.168.2.20
+[*] Total: 270 IPs únicos carregados.
+[*] Testando 15 usuários contra 270 alvos com até 30 threads simultâneas...
+```
+
+### Notas sobre o uso de CIDR
+
+| Ponto de atenção | Detalhe |
+|---|---|
+| **Performance** | Redes muito grandes (ex: `/16`) geram um volume elevado de IPs — use com cautela |
+| **Memória** | A lista completa de IPs é carregada na memória; para redes muito grandes, considere processar por partes |
+| **Timeout** | Ajuste `--timeout` conforme a latência da rede alvo |
+| **Threads** | Aumente `--threads` para redes grandes, mas monitore o impacto gerado na rede |
 
 ---
 
@@ -247,13 +314,6 @@ pip install impacket
 </details>
 
 ---
-
-
-Este software é fornecido para fins **educacionais** e de **auditoria autorizada**.
-
----
-
-## Contribuições
 
 Contribuições são bem-vindas! Abra uma [issue](../../issues) ou um [pull request](../../pulls) para sugerir melhorias, relatar bugs ou propor novas funcionalidades.
 
