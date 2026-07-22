@@ -46,7 +46,7 @@
 
 ---
 
-##-Funcionalidades
+## Funcionalidades
 
 | Recurso | Descrição |
 |---|---|
@@ -61,7 +61,7 @@
 
 ---
 
-##-Dependências
+## Dependências
 
 - **Python 3.8+**
 - **[Impacket](https://github.com/fortra/impacket)**
@@ -74,7 +74,7 @@ pip install impacket
 
 ---
 
-##-Instalação
+## Instalação
 
 ```bash
 git clone https://github.com/Caio-Campolino/ntlmhunter.git
@@ -84,7 +84,7 @@ chmod +x ntlmhunter.py
 
 ---
 
-##-Exemplos de Uso
+## Exemplos de Uso
 
 ### Cracking offline apenas
 
@@ -118,7 +118,7 @@ chmod +x ntlmhunter.py
 
 ---
 
-##-Estrutura de Arquivos
+## Estrutura de Arquivos
 
 ### Arquivo de Hashes
 
@@ -213,7 +213,7 @@ Responsável por carregar e preparar a lista final de alvos:
 
 ---
 
-##-Mecanismo de Validação
+## Mecanismo de Validação
 
 O NTLMHunter implementa uma validação em duas etapas para garantir a autenticidade das credenciais:
 
@@ -224,7 +224,7 @@ Essa abordagem elimina falsos positivos e garante que apenas autenticações rea
 
 ---
 
-##-Formatos de Saída
+## Formatos de Saída
 
 ### TXT
 Relatório legível, com seções organizadas para análise manual.
@@ -253,7 +253,7 @@ Formato tabular, pronto para importação em planilhas e ferramentas de análise
 
 ---
 
-##-Configuração Avançada
+## Configuração Avançada
 
 ### Ajuste de performance
 
@@ -271,7 +271,7 @@ Formato tabular, pronto para importação em planilhas e ferramentas de análise
 
 ---
 
-##-Avisos Importantes
+## Avisos Importantes
 
 > **Uso Autorizado:** esta ferramenta destina-se **apenas** a testes de segurança autorizados e estudos acadêmicos.
 
@@ -281,7 +281,7 @@ Formato tabular, pronto para importação em planilhas e ferramentas de análise
 
 ---
 
-##-Solução de Problemas
+## Solução de Problemas
 
 <details>
 <summary><strong>Erro: "Impacket não instalado"</strong></summary>
