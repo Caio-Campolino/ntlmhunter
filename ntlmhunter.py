@@ -183,7 +183,52 @@ def test_smb_pth(ip, user, nt_hash, domain='', timeout=5, debug=False):
     return False
 
 # ------------------------------------------------------------
-# 4. Função para testar todos os hashes (concorrente)
+# 4. Função para carregar alvos com suporte a CIDR
+# ------------------------------------------------------------
+def load_targets(targets_file, verbose=False):
+    """
+    Carrega alvos de um arquivo, suportando IPs únicos e notação CIDR.
+    Retorna uma lista de IPs únicos e ordenados.
+    """
+    if not os.path.exists(targets_file):
+        raise FileNotFoundError(f"Arquivo {targets_file} não encontrado.")
+    
+    targets = set()
+    total_expanded = 0
+    
+    with open(targets_file, 'r') as f:
+        for line_num, line in enumerate(f, 1):
+            line = line.strip()
+            if not line or line.startswith('#'):  # Suporte a comentários
+                continue
+            
+            try:
+                if '/' in line:
+                    # Rede CIDR
+                    network = ipaddress.ip_network(line, strict=False)
+                    new_ips = [str(ip) for ip in network.hosts()]
+                    targets.update(new_ips)
+                    total_expanded += len(new_ips)
+                    if verbose:
+                        print(f"[*] Expandido {line} -> {len(new_ips)} IPs")
+                else:
+                    # IP único
+                    ipaddress.ip_address(line)
+                    targets.add(line)
+                    if verbose:
+                        print(f"[*] Adicionado IP: {line}")
+            except ValueError as e:
+                print(f"[AVISO] Linha {line_num} ignorada: '{line}' - {e}")
+    
+    if not targets:
+        raise ValueError("Nenhum IP válido encontrado no arquivo.")
+    
+    targets_sorted = sorted(targets)
+    print(f"[*] Total: {len(targets_sorted)} IPs únicos carregados.")
+    return targets_sorted
+
+# ------------------------------------------------------------
+# 5. Função para testar todos os hashes (concorrente)
 # ------------------------------------------------------------
 def test_all_hashes(hashes, target_ips, domain_map, domain='',
                     max_workers=20, timeout=5, debug=False):
@@ -237,7 +282,7 @@ def test_smb_pth_wrapper(ip, user, nt_hash, domain, timeout, stop_event, debug):
         return False
 
 # ------------------------------------------------------------
-# 5. Função para salvar resultados
+# 6. Função para salvar resultados
 # ------------------------------------------------------------
 def save_results(output_file, cracked, valid_creds, args, output_format='txt'):
     data = {
@@ -305,7 +350,7 @@ def save_results(output_file, cracked, valid_creds, args, output_format='txt'):
     os.chmod(output_file, 0o600)
 
 # ------------------------------------------------------------
-# 6. MAIN
+# 7. MAIN
 # ------------------------------------------------------------
 def main():
     parser = ArgumentParser(
@@ -370,23 +415,10 @@ def main():
                 sys.exit(1)
 
     if args.targets:
-        if not os.path.exists(args.targets):
-            print(f"[ERRO] Arquivo de alvos {args.targets} não encontrado.")
-            sys.exit(1)
-
-        targets = []
-        with open(args.targets, 'r') as f:
-            for line in f:
-                ip_str = line.strip()
-                if not ip_str:
-                    continue
-                try:
-                    ipaddress.ip_address(ip_str)
-                    targets.append(ip_str)
-                except ValueError:
-                    print(f"[AVISO] IP inválido ignorado: {ip_str}")
-        if not targets:
-            print("[ERRO] Nenhum IP válido encontrado no arquivo de alvos.")
+        try:
+            targets = load_targets(args.targets, verbose=args.verbose)
+        except (FileNotFoundError, ValueError) as e:
+            print(f"[ERRO] {e}")
             sys.exit(1)
 
         valid_creds = test_all_hashes(
