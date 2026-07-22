@@ -33,7 +33,7 @@
 
 ---
 
-##-Visão Geral
+## Visão Geral
 
 **NTLMHunter** é uma solução completa para testes de segurança em ambientes Windows, unindo em um único fluxo de trabalho:
 
