@@ -2,7 +2,7 @@
 
 # NTLMHunter
 
-**Ferramenta profissional de auditoria de segurança para cracking offline de hashes NTLM e validação online via Pass-the-Hash (SMB)**
+**Ferramenta para auditoria de segurança, cracking offline de hashes NTLM e validação online via Pass-the-Hash (SMB)**
 
 [![Python](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-Educacional%2FAutorizado-lightgrey.svg)](#-licença)
